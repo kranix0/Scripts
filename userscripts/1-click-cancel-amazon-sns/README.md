@@ -8,11 +8,11 @@ Beta: `0.4.0-beta-1`
 
 This beta is current-page only. Pagination and multi-page cancellation are intentionally out of scope.
 
-The maintainer currently has no active Subscribe & Save subscriptions, so live cancellation has not yet been personally verified against active items.
+It *ought to* work. I currently have no active Subscribe & Save subscriptions, so I can't personally verify against active items. Please let me know how you go with it.
 
 ## What it does
 
-- Adds a floating button to Amazon Subscribe & Save pages.
+- Adds a floating button to Amazon Subscribe & Save pages, in the bottom-right corner.
 - Shows the number of visible S&S subscriptions found on the current page.
 - Cancels only the visible subscriptions listed in the button label.
 - Uses the current Amazon marketplace origin, so it can work across supported Amazon domains.
