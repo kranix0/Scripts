@@ -1,7 +1,7 @@
 # Scripts
 Small, useful scripts maintained for low-friction, practical use.
 
-This repository is a home for scripts that are useful enough to preserve, share or publish, but not large enough to justify a dedicated repository of their own.
+This repository contains small, practical scripts that solve real-world problems. They are intentionally simple, documented, and designed to be easy to adopt and maintain.
 
 ## Scope
 
