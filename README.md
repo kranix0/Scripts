@@ -1,5 +1,5 @@
 # Scripts
-Small, useful scripts maintained for low-friction, practical use.
+*Small, useful scripts maintained for low-friction, practical use.*
 
 This repository contains small, practical scripts that solve real-world problems. They are intentionally simple, documented, and designed to be easy to adopt and maintain.
 
@@ -11,26 +11,6 @@ This repository may contain:
 * shell scripts;
 * small Python utilities;
 * other lightweight automation helpers.
-
-## Structure
-
-```
-scripts/
-  userscripts/
-    amazon-sns-cancel/
-      README.md
-      NOTICE.md
-      CHANGELOG.md
-      1-click_cancel_amazon_sns.user.js
-```
-
-More categories may be added as needed, such as:
-
-```
-shell/
-python/
-macos/
-```
 
 ## Principles
 
@@ -46,13 +26,8 @@ Unless a script folder says otherwise, scripts in this repository are licensed u
 
 Some scripts may include adapted third-party code, attribution requirements or additional provenance notes. Check the relevant script folder before reusing or redistributing a specific script.
 
-## Status
+## Attribution
 
-Scripts here may vary in maturity. Each script folder should state its own status, such as:
+This repository is shared under the MIT Licence to encourage reuse and adaptation.
 
-* experimental;
-* beta;
-* stable;
-* archived.
-
-Do not assume every script in this repository is production-ready.
+If you build on something from this repository, I'd genuinely appreciate a mention or a link back. It's not a legal requirement under the licence, but it helps others discover the original work and supports future contributions.
