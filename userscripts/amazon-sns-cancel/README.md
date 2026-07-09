@@ -28,4 +28,4 @@ Install the `.user.js` file with a userscript manager such as AdGuard, Tampermon
 
 ## Attribution
 
-The core cancellation mechanism is adapted from [L422Y’s Amazon Subscribe & Save gist](https://gist.github.com/L422Y/53b75be4bb8afd5cd6143e74150cc142). Used with permission; attribution/link required.
+The core cancellation mechanism is adapted from [L422Y’s Amazon Subscribe & Save gist](https://gist.github.com/L422Y/53b75be4bb8afd5cd6143e74150cc142). Used with [permission](https://gist.github.com/L422Y/53b75be4bb8afd5cd6143e74150cc142?permalink_comment_id=6240234#gistcomment-6240234); attribution/link required.
