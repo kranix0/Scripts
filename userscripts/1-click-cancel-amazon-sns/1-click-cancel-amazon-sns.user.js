@@ -5,8 +5,8 @@
 // @description  Adds a one-click button to Amazon Subscribe & Save pages to cancel visible subscriptions.
 // @author       Sridhar Dhanapalan <sridhar@dhanapalan.com>
 // @license      Custom; attribution required; original gist credit/link required
-// @downloadURL  https://TBC/raw/1-click-cancel-amazon-sns.user.js
-// @updateURL    https://TBC/raw/1-click-cancel-amazon-sns.user.js
+// @downloadURL  https://raw.githubusercontent.com/kranix0/scripts/main/userscripts/1-click-cancel-amazon-sns/1-click-cancel-amazon-sns.user.js
+// @updateURL    https://raw.githubusercontent.com/kranix0/scripts/main/userscripts/1-click-cancel-amazon-sns/1-click-cancel-amazon-sns.user.js
 // @match        https://www.amazon.com/auto-deliveries*
 // @match        https://www.amazon.com.au/auto-deliveries*
 // @match        https://www.amazon.co.uk/auto-deliveries*
