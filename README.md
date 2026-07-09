@@ -40,11 +40,11 @@ Scripts in this repository should favour:
 * minimal hidden state;
 * safe defaults.
 
-## Licensing and provenance
+## Licence
 
-This repository does not currently use a single repo-wide licence.
+Unless a script folder says otherwise, scripts in this repository are licensed under the MIT Licence. See [`LICENSE`](./LICENSE).
 
-Some scripts may have their own licence, notice or attribution requirements. Check the relevant script folder before reusing, modifying or redistributing any script.
+Some scripts may include adapted third-party code, attribution requirements or additional provenance notes. Check the relevant script folder before reusing or redistributing a specific script.
 
 ## Status
 
