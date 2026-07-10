@@ -29,13 +29,14 @@
 // Changelog:
 // 0.4.0:
 // - Shows a one-click floating button with the number of visible Subscribe & Save items found on the current Amazon auto-deliveries page.
-// - Cancels only the visible/current-page subscriptions listed in the button label; pagination and multi-page cancellation are intentionally out of scope for this beta.
+// - Cancels only the visible/current-page subscriptions listed in the button label; pagination and multi-page cancellation are intentionally out of scope.
 // - Uses the current Amazon marketplace origin instead of a hardcoded amazon.com origin, so the same cancellation path can work across supported Amazon domains.
 // - Adds request timeouts and per-item success/failure reporting so the final alert does not silently imply success when an item fails.
 //
 // Provenance:
 // The core cancellation mechanism is adapted from L422Y's Amazon Subscribe & Save gist:
 // https://gist.github.com/L422Y/53b75be4bb8afd5cd6143e74150cc142
+// Permission: https://gist.github.com/L422Y/53b75be4bb8afd5cd6143e74150cc142?permalink_comment_id=6240234#gistcomment-6240234
 // Used with permission; attribution/link required.
 
 (() => {
