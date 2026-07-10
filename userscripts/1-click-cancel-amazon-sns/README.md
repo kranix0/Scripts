@@ -4,7 +4,7 @@ A one-click userscript for cancelling visible Amazon Subscribe & Save subscripti
 
 ## Status
 
-Current version: **0.4.1**
+Current version: **0.4.2**
 
 It operates on the current page only. Pagination and automatic multi-page cancellation are intentionally out of scope.
 
@@ -12,9 +12,11 @@ See [`CHANGELOG.md`](./CHANGELOG.md) for release history.
 
 ## What it does
 
-- Adds a floating cancellation button to the bottom-right corner of supported Amazon Subscribe & Save pages.
+- Adds a floating status and cancellation button to the bottom-right corner of supported Amazon Subscribe & Save pages.
+- Shows an understated status button when no visible subscriptions are found, confirming that the userscript is installed and running.
 - Shows the number of visible subscriptions detected on the current page.
 - Cancels only the subscriptions represented by the number shown on the button.
+- Provides explanatory tooltips for inactive, cancellation-ready and working states.
 - Works from the current Amazon marketplace origin rather than relying on a hardcoded `amazon.com` address.
 - Works with the main S&S links in Amazon's UI.
 - Applies a timeout to each cancellation request.
@@ -22,7 +24,7 @@ See [`CHANGELOG.md`](./CHANGELOG.md) for release history.
 
 ## Safety model
 
-The button label is the confirmation.
+When visible subscriptions are found, the button label is the confirmation.
 
 For example, clicking:
 
@@ -31,6 +33,8 @@ For example, clicking:
 attempts to cancel the three visible subscriptions detected on the current page.
 
 There is no additional confirmation dialog, and the operation cannot be undone by this script. Check the button count before clicking it.
+
+When no visible subscriptions are found, the button appears in an understated status mode. Clicking it only confirms that the userscript is installed and running. It does not make any cancellation requests.
 
 ## Supported Amazon marketplaces
 
@@ -65,10 +69,11 @@ Your userscript manager should recognise the `.user.js` file and offer to instal
 ## Usage
 
 1. Open Amazon's **Subscribe & Save** or **Your Auto-Deliveries** page.
-2. Confirm that the subscriptions you intend to cancel are visible.
-3. Check the number shown on the floating cancellation button.
-4. Click the button.
-5. Review the success and failure summary.
+2. Check the floating button:
+   - If no subscriptions are visible, click the understated status button to confirm that the userscript is running.
+   - If subscriptions are visible, confirm that the displayed count matches the items you intend to cancel.
+3. Click the cancellation button.
+4. Review the success and failure summary.
 
 If Amazon displays subscriptions across multiple pages, repeat the process separately on each page.
 
