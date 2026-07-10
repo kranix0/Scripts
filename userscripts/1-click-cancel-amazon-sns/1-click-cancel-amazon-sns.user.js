@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         1-Click Cancel Amazon S&S
-// @namespace    https://github.com/kranix0/Scripts/tree/main/userscripts/1-click-cancel-amazon-sns
-// @version      0.4.0
+// @namespace    com.dhanapalan.userscripts
+// @version      0.4.1
 // @description  Adds a one-click button to Amazon Subscribe & Save pages to cancel visible subscriptions.
 // @author       Sridhar Dhanapalan <sridhar@dhanapalan.com>
 // @license      MIT; see NOTICE.md for third-party attribution
@@ -26,12 +26,8 @@
 // - The button is the confirmation: clicking it cancels exactly what its label says.
 // - Visible-page cancellation only. No pagination.
 //
-// Changelog:
-// 0.4.0:
-// - Shows a one-click floating button with the number of visible Subscribe & Save items found on the current Amazon auto-deliveries page.
-// - Cancels only the visible/current-page subscriptions listed in the button label; pagination and multi-page cancellation are intentionally out of scope.
-// - Uses the current Amazon marketplace origin instead of a hardcoded amazon.com origin, so the same cancellation path can work across supported Amazon domains.
-// - Adds request timeouts and per-item success/failure reporting so the final alert does not silently imply success when an item fails.
+// Release history:
+// https://github.com/kranix0/Scripts/blob/main/userscripts/1-click-cancel-amazon-sns/CHANGELOG.md
 //
 // Provenance:
 // The core cancellation mechanism is adapted from L422Y's Amazon Subscribe & Save gist:
@@ -110,7 +106,8 @@
     let container;
 
     try {
-      const panelUrl = `${location.origin}/auto-deliveries/ajax/cancelSubscription?deviceType=desktop&deviceContext=web&subscriptionId=${subscriptionId}`;
+      const encodedSubscriptionId = encodeURIComponent(subscriptionId);
+      const panelUrl = `${location.origin}/auto-deliveries/ajax/cancelSubscription?deviceType=desktop&deviceContext=web&subscriptionId=${encodedSubscriptionId}`;
       const response = await fetchWithTimeout(panelUrl, {}, CANCEL_TIMEOUT_MS);
 
       if (!response.ok) {
@@ -135,17 +132,29 @@
         };
       }
 
+      const method = form.method.toUpperCase();
+      if (method !== 'POST') {
+        return {
+          ok: false,
+          subscriptionId,
+          reason: `unexpected cancel form method: ${method}`,
+        };
+      }
+
       const formData = new FormData(form);
-      const formEntries = Object.fromEntries(formData.entries());
+      const body = new URLSearchParams();
+      for (const [name, value] of formData.entries()) {
+        body.append(name, String(value));
+      }
 
       const submitResponse = await fetchWithTimeout(
         form.action,
         {
-          method: form.method,
+          method,
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
           },
-          body: new URLSearchParams(formEntries),
+          body,
         },
         CANCEL_TIMEOUT_MS
       );
