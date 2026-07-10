@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         1-Click Cancel Amazon S&S
 // @namespace    https://github.com/kranix0/scripts/userscripts/amazon-sns-cancel
-// @version      0.4.0-beta-1
+// @version      0.4.0
 // @description  Adds a one-click button to Amazon Subscribe & Save pages to cancel visible subscriptions.
 // @author       Sridhar Dhanapalan <sridhar@dhanapalan.com>
 // @license      Custom; attribution required; original gist credit/link required
@@ -27,14 +27,11 @@
 // - Visible-page cancellation only. No pagination.
 //
 // Changelog:
-// 0.4.0-beta-1:
-// - Beta release of the current-page-only userscript.
+// 0.4.0:
 // - Shows a one-click floating button with the number of visible Subscribe & Save items found on the current Amazon auto-deliveries page.
 // - Cancels only the visible/current-page subscriptions listed in the button label; pagination and multi-page cancellation are intentionally out of scope for this beta.
 // - Uses the current Amazon marketplace origin instead of a hardcoded amazon.com origin, so the same cancellation path can work across supported Amazon domains.
 // - Adds request timeouts and per-item success/failure reporting so the final alert does not silently imply success when an item fails.
-// - Preserves attribution to L422Y's original cancellation mechanism and includes permission/credit requirements.
-// - Known limitation: this beta has not been live-tested by the maintainer against active Subscribe & Save items because their subscription list is currently empty. Once tested, the maintainer will update the script to fix any issues and release a stable version.
 //
 // Provenance:
 // The core cancellation mechanism is adapted from L422Y's Amazon Subscribe & Save gist:
