@@ -4,9 +4,11 @@ A one-click userscript for cancelling visible Amazon Subscribe & Save subscripti
 
 ## Status
 
-Current version: **0.4.0**
+Current version: **0.4.1**
 
 It operates on the current page only. Pagination and automatic multi-page cancellation are intentionally out of scope.
+
+See [`CHANGELOG.md`](./CHANGELOG.md) for release history.
 
 ## What it does
 
@@ -75,7 +77,8 @@ If Amazon displays subscriptions across multiple pages, repeat the process separ
 - Only subscriptions visible on the current page are processed.
 - The script does not navigate through pagination.
 - It depends on Amazon's current page structure and cancellation workflow.
-- Script is functional as per user feedback. I don't have any subscriptions anymore (thanks to an earlier version of this script!) so I couldn't test myself.
+- Successful cancellation of active subscriptions has been confirmed through user feedback.
+- I no longer have active subscriptions myself – thanks to an earlier version of this script – so I cannot currently perform live cancellation testing.
 
 ## Licence and attribution
 
