@@ -2,6 +2,20 @@
 
 Notable changes to **1-Click Cancel Amazon S&S** are recorded here.
 
+## 0.4.2
+
+### Added
+
+- Adds an understated, clickable status mode when no visible Subscribe & Save subscriptions are found.
+- Clicking the status button confirms that the userscript is installed and running without making cancellation requests.
+- Adds explanatory tooltips for the empty, cancellation-ready and working button states.
+
+### Changed
+
+- Makes button styling explicit for each state so that inactive, ready and working modes remain visually distinct.
+
+The Amazon subscription detection and cancellation request workflow are unchanged.
+
 ## 0.4.1
 
 ### Changed
