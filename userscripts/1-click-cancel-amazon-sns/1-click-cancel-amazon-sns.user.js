@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         1-Click Cancel Amazon S&S
 // @namespace    com.dhanapalan.userscripts
-// @version      0.4.1
+// @version      0.4.2
 // @description  Adds a one-click button to Amazon Subscribe & Save pages to cancel visible subscriptions.
 // @author       Sridhar Dhanapalan <sridhar@dhanapalan.com>
 // @license      MIT; see NOTICE.md for third-party attribution
@@ -87,19 +87,67 @@
     return summary.join('\n');
   }
 
-  function updateButton(button) {
-    const ids = getVisibleSubscriptionIds();
+  function setButtonMode(button, mode, count = 0) {
+    if (mode === 'empty') {
+      button.dataset.mode = 'empty';
+      button.disabled = false;
+      button.textContent = '✓ 1-Click S&S active';
+      button.title =
+        'The userscript is running. No visible Subscribe & Save subscriptions ' +
+        'were found on this page. Click for details.';
 
-    if (ids.length === 0) {
-      button.textContent = '🛒 No visible S&S found';
-      button.disabled = true;
-      button.title = 'No visible Subscribe & Save subscriptions were found on this page.';
+      Object.assign(button.style, {
+        border: '1px solid #aaa',
+        background: '#e7e7e7',
+        color: '#555',
+        cursor: 'help',
+        boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+        textShadow: 'none',
+        opacity: '1',
+      });
       return;
     }
 
-    button.textContent = `🛒 Cancel ${ids.length} visible S&S`;
+    if (mode === 'working') {
+      button.dataset.mode = 'working';
+      button.disabled = true;
+      button.textContent = `⏳ Cancelling ${count} S&S item(s)...`;
+      button.title = 'Cancellation requests are in progress. Please wait.';
+
+      Object.assign(button.style, {
+        border: '1px solid rgba(255,255,255,0.35)',
+        background: 'linear-gradient(135deg, #ff9900, #b12704)',
+        color: '#fff',
+        cursor: 'wait',
+        boxShadow: '0 4px 14px rgba(0,0,0,0.28)',
+        textShadow: '0 1px 1px rgba(0,0,0,0.25)',
+        opacity: '0.75',
+      });
+      return;
+    }
+
+    const noun = count === 1 ? 'subscription' : 'subscriptions';
+    button.dataset.mode = 'cancel';
     button.disabled = false;
-    button.title = 'Cancels only the subscriptions visible on this page.';
+    button.textContent = `🛒 Cancel ${count} visible S&S`;
+    button.title =
+      `Click to cancel the ${count} Subscribe & Save ${noun} visible on this page. ` +
+      'The button is the confirmation.';
+
+    Object.assign(button.style, {
+      border: '1px solid rgba(255,255,255,0.35)',
+      background: 'linear-gradient(135deg, #ff9900, #b12704)',
+      color: '#fff',
+      cursor: 'pointer',
+      boxShadow: '0 4px 14px rgba(0,0,0,0.28)',
+      textShadow: '0 1px 1px rgba(0,0,0,0.25)',
+      opacity: '1',
+    });
+  }
+
+  function updateButton(button) {
+    const ids = getVisibleSubscriptionIds();
+    setButtonMode(button, ids.length === 0 ? 'empty' : 'cancel', ids.length);
   }
 
   async function cancelSubscription(subscriptionId) {
@@ -194,12 +242,17 @@
     const ids = getVisibleSubscriptionIds();
 
     if (ids.length === 0) {
-      updateButton(button);
+      setButtonMode(button, 'empty');
+      alert(
+        `${SCRIPT_NAME}\n\n` +
+        'The userscript is installed and running on this page.\n\n' +
+        'No visible Subscribe & Save subscriptions were found.\n\n' +
+        'When subscriptions are present, the button will show how many visible items it can cancel.'
+      );
       return;
     }
 
-    button.disabled = true;
-    button.textContent = `⏳ Cancelling ${ids.length} S&S item(s)...`;
+    setButtonMode(button, 'working', ids.length);
 
     try {
       const results = await cancelVisibleSubscriptions(ids);
@@ -230,16 +283,10 @@
       bottom: '18px',
       zIndex: '2147483647',
       padding: '11px 16px',
-      border: '1px solid rgba(255,255,255,0.35)',
       borderRadius: '999px',
-      background: 'linear-gradient(135deg, #ff9900, #b12704)',
-      color: '#fff',
       fontSize: '14px',
       fontWeight: '700',
       letterSpacing: '0.2px',
-      cursor: 'pointer',
-      boxShadow: '0 4px 14px rgba(0,0,0,0.28)',
-      textShadow: '0 1px 1px rgba(0,0,0,0.25)',
     });
 
     button.addEventListener('click', () => onClick(button));
