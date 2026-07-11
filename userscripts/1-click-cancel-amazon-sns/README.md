@@ -30,6 +30,7 @@ This functionality is deliberately provided as a userscript rather than a dedica
 - **Narrow execution scope:** the script runs only on supported Amazon Subscribe & Save management pages and requests no additional userscript APIs (`@grant none`).
 - **Predictable behaviour:** the button always says exactly what it will do. If it says **Cancel 3 visible S&S**, it attempts to cancel only those three visible subscriptions. There is no pagination, hidden traversal or background automation.
 - **Portable:** the same script can run through compatible managers such as AdGuard, Tampermonkey and Violentmonkey across multiple browsers and operating systems.
+- **OS-wide with AdGuard Desktop:** I run the script through AdGuard Desktop, which makes it available to supported browsers without installing and maintaining it separately in each browser.
 - **Low additional overhead:** people who already use a userscript manager do not need to install and maintain another dedicated browser extension.
 - **Easy to adapt:** the single-file implementation is straightforward to inspect, fork, modify, self-host or disable.
 
