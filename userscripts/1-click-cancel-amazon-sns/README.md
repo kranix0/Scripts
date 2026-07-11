@@ -22,6 +22,19 @@ See [`CHANGELOG.md`](./CHANGELOG.md) for release history.
 - Applies a timeout to each cancellation request.
 - Reports per-item successes and failures after the run.
 
+## Why a userscript?
+
+This functionality is deliberately provided as a userscript rather than a dedicated browser extension.
+
+- **Directly inspectable:** the complete installed program is one readable `.user.js` file. There is no compiled distribution or build output to compare with the published source.
+- **Narrow execution scope:** the script runs only on supported Amazon Subscribe & Save management pages and requests no additional userscript APIs (`@grant none`).
+- **Predictable behaviour:** the button always says exactly what it will do. If it says **Cancel 3 visible S&S**, it attempts to cancel only those three visible subscriptions. There is no pagination, hidden traversal or background automation.
+- **Portable:** the same script can run through compatible managers such as AdGuard, Tampermonkey and Violentmonkey across multiple browsers and operating systems.
+- **Low additional overhead:** people who already use a userscript manager do not need to install and maintain another dedicated browser extension.
+- **Easy to adapt:** the single-file implementation is straightforward to inspect, fork, modify, self-host or disable.
+
+Dedicated browser extensions can offer easier store-based installation and richer functionality. This userscript instead prioritises simplicity, portability, narrow scope and transparency.
+
 ## Safety model
 
 When visible subscriptions are found, the button label is the confirmation.
