@@ -94,6 +94,19 @@ The script:
 - It relies on Startpage continuing to use the `locationPref` cookie for Search Location. If Startpage changes that implementation, the script may warn until it is updated.
 - A userscript manager must inject the script on Startpage pages. If the manager or AdGuard filtering is disabled for Startpage, the guard cannot run.
 
+## Maintenance and future troubleshooting
+
+No routine maintenance is expected. The script should normally be install-and-forget.
+
+It depends on two simple compatibility contracts:
+
+- Startpage continues to expose Search Location through a non-empty `locationPref` cookie.
+- The userscript manager continues to provide `GM_getValue` / `GM_setValue` storage and inject the script on Startpage pages.
+
+If the warning appears while Search Location is visibly configured, first check whether Startpage has changed how Search Location is stored or renamed `locationPref`. If the script stops appearing at all, check that the userscript is still enabled and being injected on Startpage.
+
+Those are the expected failure modes. The script has no other services, dependencies, credentials or background processes to maintain.
+
 ## Stable update contract
 
 The public install/update endpoint is:
