@@ -2,6 +2,10 @@
 
 A small userscript that makes Startpage's Search Location failure visible instead of silent.
 
+## Purpose
+
+Startpage can silently forget your saved Search Location. This script warns you when that happens, so you know your search results may no longer be localised the way you expect.
+
 ## Status
 
 Current version: **0.1.0**
