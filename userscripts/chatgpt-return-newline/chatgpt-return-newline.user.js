@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ChatGPT Return = Newline
 // @namespace    com.dhanapalan.userscripts
-// @version      1.0.0
+// @version      1.0.1
 // @description  Restores plain Enter/Return as a newline in ChatGPT's new composer UI instead of sending the prompt.
 // @author       Sridhar Dhanapalan <sridhar@dhanapalan.com>
 // @license      MIT
@@ -33,9 +33,14 @@
 (() => {
   'use strict';
 
-  const COMPOSER =
-    'form[data-chatgpt-composer] ' +
-    '.ProseMirror[contenteditable="true"][role="textbox"]';
+  // ChatGPT is currently serving more than one composer DOM variant.
+  // Prefer semantic/stable hooks and retain the previous variant for gradual
+  // rollouts or A/B cohorts.
+  const COMPOSER = [
+    '#prompt-textarea.ProseMirror[contenteditable="true"][role="textbox"]',
+    'form[data-type="unified-composer"] .ProseMirror[contenteditable="true"][role="textbox"]',
+    'form[data-chatgpt-composer] .ProseMirror[contenteditable="true"][role="textbox"]',
+  ].join(', ');
 
   window.addEventListener('keydown', (event) => {
     if (
