@@ -1,46 +1,45 @@
 # ChatGPT Return = Newline
 
-Restore **plain Enter/Return as a newline** in ChatGPT's new composer UI when it unexpectedly sends the prompt instead.
+Keep **plain Enter/Return as a newline** and restore **Cmd+Enter / Ctrl+Enter as Send** when newer ChatGPT composer variants change those keyboard behaviours.
 
 **[Install the userscript](https://raw.githubusercontent.com/kranix0/Scripts/main/userscripts/chatgpt-return-newline/chatgpt-return-newline.user.js)** · [Get Violentmonkey](https://violentmonkey.github.io/get-it/) · [View source](./chatgpt-return-newline.user.js)
 
 ## Why this exists
 
-On **20 September 2026**, a newer ChatGPT interface started appearing on some accounts. In that interface, plain **Enter/Return can submit the prompt instead of inserting a newline**, even when ChatGPT is configured to use a modified shortcut for sending.
+ChatGPT has been serving multiple composer UI variants during September 2026, and the keyboard behaviour has changed between them.
 
-That makes multi-line prompt editing unexpectedly risky: a normal line break can send an unfinished message.
+Two variants have been observed:
 
-This userscript restores the expected editing behaviour:
+- **20 September 2026:** plain **Enter/Return could submit the prompt** instead of inserting a newline.
+- **22 September 2026:** plain Return again inserts a newline, but the previous keyboard-shortcut settings screen is no longer visible and **Cmd+Return does nothing** on the observed macOS UI.
+
+The interface is not universal. OpenAI may be gradually rolling changes out, A/B testing variants, or otherwise serving different implementations to different accounts; this project does not assume a published rollout schedule.
+
+This userscript provides one stable keyboard contract across the known variants:
 
 - **Enter / Return** → insert a newline
+- **Cmd+Enter** on macOS → Send
+- **Ctrl+Enter** on Windows/Linux → Send
 - **Shift+Enter** → left to ChatGPT
-- **Cmd+Enter** on macOS → left to ChatGPT
-- **Ctrl+Enter** on Windows/Linux → left to ChatGPT
 - **Option/Alt+Enter** → left to ChatGPT
-
-The script does not redefine modified shortcuts. It only prevents an unmodified Enter/Return from being treated as Send.
 
 ## Is this for everyone?
 
 No.
 
-This workaround targets a **new ChatGPT UI variant observed on 20 September 2026**. The interface is not yet universal. OpenAI may be gradually rolling it out, A/B testing variants, or otherwise serving different composer implementations to different accounts; there is no published rollout schedule assumed here.
+You probably **do not need this script** if ChatGPT already gives you the keyboard behaviour above.
 
-You probably **do not need this script** if:
-
-- plain Enter/Return already creates the newline behaviour you want; or
-- your ChatGPT account is still using an older composer UI without this regression.
-
-If OpenAI fixes the behaviour upstream, disabling or uninstalling this script is preferable to keeping an unnecessary workaround.
+If OpenAI restores this behaviour upstream, disabling or uninstalling this compatibility shim is preferable to keeping an unnecessary workaround.
 
 ## What it does
 
-The script listens only for an **unmodified, trusted Enter keypress inside ChatGPT's composer**.
+The script listens only for trusted Enter keypresses inside known ChatGPT composer variants.
 
-When that happens it:
+For **plain Enter/Return**, it prevents ChatGPT from treating the keypress as Send and re-dispatches the action as **Shift+Enter**, which the current composer understands as a newline.
 
-1. prevents ChatGPT from treating the original keypress as Send;
-2. re-dispatches the action as **Shift+Enter**, which the current composer already understands as a newline.
+For **Cmd+Enter / Ctrl+Enter**, it submits ChatGPT's own composer form using the browser's standard `requestSubmit()` path.
+
+This is deliberate: in the 22 September UI, the composer form exists consistently, while the visible Send control is transient and is not present at all when the composer is empty. The script therefore avoids depending on a particular Send-button selector or element type.
 
 It does **not**:
 
@@ -51,8 +50,6 @@ It does **not**:
 - use background polling;
 - collect telemetry;
 - load dependencies.
-
-This narrow approach was chosen after testing broader workarounds against the new UI. Keeping only the verified newline fix reduces maintenance and limits the script's blast radius.
 
 ## Installation
 
@@ -82,27 +79,17 @@ In **AdGuard for Mac**:
 4. Install it.
 5. Reload ChatGPT.
 
-The script has been verified with **Vivaldi + AdGuard Desktop on macOS** against the new ChatGPT UI observed on 20 September 2026.
+The userscript has been exercised with **Vivaldi + AdGuard Desktop on macOS** against ChatGPT composer variants observed on 20 and 22 September 2026.
 
 ## Usage
 
 There is no UI and nothing to configure.
 
-After installing the script, open or reload ChatGPT and type a multi-line message.
-
 ### Quick verification
 
-Type:
-
-```text
-one
-```
-
-Press **Return**, then type:
-
-```text
-two
-```
+1. Type `one`.
+2. Press **Return**.
+3. Type `two`.
 
 Expected result:
 
@@ -111,31 +98,35 @@ one
 two
 ```
 
-The first Return should **not** send the message.
+The Return should **not** send the message.
 
-If your ChatGPT settings use **Cmd+Return** or **Ctrl+Return** for sending, that modified shortcut remains under ChatGPT's control.
+Then press **Cmd+Return** on macOS or **Ctrl+Return** on Windows/Linux.
+
+Expected result: the current message is sent once.
 
 ## Compatibility
 
 Current compatibility contract:
 
 - host: `https://chatgpt.com/*`
-- composer: a ChatGPT `form[data-chatgpt-composer]` containing a ProseMirror `contenteditable` textbox
+- known composer hooks:
+  - `#prompt-textarea.ProseMirror[contenteditable="true"][role="textbox"]`
+  - `form[data-type="unified-composer"]`
+  - the earlier `form[data-chatgpt-composer]` variant
 - newline action: ChatGPT continues to interpret **Shift+Enter** as a newline
+- send action: the editor remains inside an HTML `form` that responds to `requestSubmit()`
 
 The script deliberately avoids generated CSS class names and does not depend on the New Chat/sidebar structure.
 
-### Verified
+### Verified environment
 
 - Vivaldi on macOS
 - AdGuard Desktop userscript runtime
-- ChatGPT UI variant observed on 20 September 2026
+- ChatGPT composer variants observed on 20 and 22 September 2026
 
 ### Expected but not separately verified yet
 
-Because the script uses standard userscript metadata and ordinary browser events with `@grant none`, it is designed to work with userscript managers such as Violentmonkey on current Chromium and Firefox-family browsers.
-
-If you confirm another combination, contributions are welcome.
+Because the script uses standard userscript metadata, ordinary browser events and `@grant none`, it is designed to work with userscript managers such as Violentmonkey on current Chromium and Firefox-family browsers.
 
 ## Privacy and permissions
 
@@ -153,16 +144,11 @@ The complete installed program is the single `.user.js` file in this directory.
 
 ## Automatic updates
 
-The userscript includes stable:
-
-- `@updateURL`
-- `@downloadURL`
-
-metadata pointing to the raw file on the repository's `main` branch.
+The userscript includes stable `@updateURL` and `@downloadURL` metadata pointing to the raw file on the repository's `main` branch.
 
 Compatible userscript managers can therefore discover newer releases through their normal update mechanism.
 
-**Release contract:** `main` is the stable channel. Development should happen away from `main`, and `@version` should be incremented before a changed release is published.
+**Release contract:** `main` is the stable channel. `@version` is incremented for changed releases.
 
 ## Known limitation: New Chat navigation
 
@@ -170,29 +156,26 @@ The same ChatGPT UI rollout also changed **New Chat** from normal link-style nav
 
 This userscript **does not try to fix that regression**.
 
-Several generic and ChatGPT-specific navigation workarounds were tested, but none preserved the source tab reliably against the 20 September 2026 UI. That functionality was intentionally left out rather than making this script brittle or invasive.
+Several generic and ChatGPT-specific navigation workarounds were tested, but none preserved the source tab reliably. That functionality was intentionally left out rather than making this script brittle or invasive.
 
 ## Troubleshooting
 
 ### Return still sends
 
 1. Confirm the userscript is enabled for `chatgpt.com`.
-2. Hard-reload ChatGPT.
-3. Confirm your userscript manager reports the script as active on the page.
-4. Check whether ChatGPT has changed the composer structure again.
+2. Confirm it has updated to the latest version.
+3. Hard-reload ChatGPT.
+4. Confirm your userscript manager reports the script as active on the page.
+5. Check whether ChatGPT has changed the composer structure again.
 
-If the UI has changed, please [open an issue](https://github.com/kranix0/Scripts/issues) with:
+### Cmd/Ctrl+Enter does nothing
 
-- browser and version;
-- userscript manager and version;
-- whether the older or newer ChatGPT UI is visible;
-- the observed Return behaviour.
+1. Confirm the userscript is version **1.1.0 or newer**.
+2. Type some text so the composer has sendable content.
+3. Press **Cmd+Return** on macOS or **Ctrl+Return** on Windows/Linux.
+4. If nothing happens, open an issue with the browser, userscript runtime and current ChatGPT UI variant.
 
 Avoid including private prompt or conversation content in bug reports.
-
-### Return works but another ChatGPT shortcut does not
-
-This script only handles **plain Enter/Return**. Modified key combinations are deliberately left to ChatGPT.
 
 ## Maintenance philosophy
 
@@ -200,10 +183,11 @@ This is a compatibility shim, not an attempt to redesign ChatGPT.
 
 The maintenance preference is:
 
-1. use the site's existing newline behaviour rather than editing the editor directly;
+1. use ChatGPT's existing editor and form behaviours rather than modifying editor state directly;
 2. depend on stable semantic attributes rather than generated classes;
-3. change as little as possible;
-4. remove the workaround when the upstream behaviour is fixed.
+3. support known rollout variants without removing working older selectors;
+4. change as little as possible;
+5. remove the workaround when the upstream behaviour is fixed.
 
 ## Licence
 
