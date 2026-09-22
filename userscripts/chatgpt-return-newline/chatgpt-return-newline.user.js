@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         ChatGPT Return = Newline
 // @namespace    com.dhanapalan.userscripts
-// @version      1.0.1
-// @description  Restores plain Enter/Return as a newline in ChatGPT's new composer UI instead of sending the prompt.
+// @version      1.1.0
+// @description  Restores plain Enter/Return as a newline and Cmd/Ctrl+Enter as Send in ChatGPT's new composer UI.
 // @author       Sridhar Dhanapalan <sridhar@dhanapalan.com>
 // @license      MIT
 // @homepageURL  https://github.com/kranix0/Scripts/tree/main/userscripts/chatgpt-return-newline
@@ -16,16 +16,18 @@
 // ==/UserScript==
 
 // Purpose:
-// Some accounts receiving ChatGPT's newer composer UI have seen plain Enter/Return
-// submit the prompt even when their ChatGPT preference is configured for a newline.
+// Some accounts receiving ChatGPT's newer composer UI have seen:
+// - plain Enter/Return submit the prompt instead of inserting a newline; and
+// - Cmd/Ctrl+Enter send inconsistently.
 //
 // Behaviour:
 // - Plain Enter/Return -> newline
-// - Shift+Enter, Cmd+Enter, Ctrl+Enter and Option/Alt+Enter -> left to ChatGPT
+// - Cmd+Enter (macOS) / Ctrl+Enter (Windows/Linux) -> Send
+// - Shift+Enter and Option/Alt+Enter -> left to ChatGPT
 //
 // Scope:
-// This script intentionally fixes only the newline regression. It does not modify
-// ChatGPT navigation, New Chat behaviour, or any other UI.
+// This script intentionally fixes only composer keyboard behaviour. It does not
+// modify ChatGPT navigation, New Chat behaviour, or any other UI.
 //
 // Release history:
 // https://github.com/kranix0/Scripts/blob/main/userscripts/chatgpt-return-newline/CHANGELOG.md
@@ -34,8 +36,8 @@
   'use strict';
 
   // ChatGPT is currently serving more than one composer DOM variant.
-  // Prefer semantic/stable hooks and retain the previous variant for gradual
-  // rollouts or A/B cohorts.
+  // Prefer semantic/stable hooks and retain known variants for gradual rollouts
+  // or A/B cohorts.
   const COMPOSER = [
     '#prompt-textarea.ProseMirror[contenteditable="true"][role="textbox"]',
     'form[data-type="unified-composer"] .ProseMirror[contenteditable="true"][role="textbox"]',
@@ -47,9 +49,6 @@
       !event.isTrusted ||
       event.key !== 'Enter' ||
       event.isComposing ||
-      event.shiftKey ||
-      event.metaKey ||
-      event.ctrlKey ||
       event.altKey
     ) {
       return;
@@ -64,10 +63,42 @@
       return;
     }
 
+    const wantsSend = !event.shiftKey && (event.metaKey || event.ctrlKey);
+
+    if (wantsSend) {
+      const form = editor.closest('form');
+      const submitButton = form?.querySelector('button[type="submit"]:not([disabled])');
+
+      // If ChatGPT does not currently expose an enabled submit control, leave the
+      // keypress alone rather than swallowing it.
+      if (!(form instanceof HTMLFormElement) || !(submitButton instanceof HTMLElement)) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+
+      if (typeof form.requestSubmit === 'function' && submitButton instanceof HTMLButtonElement) {
+        form.requestSubmit(submitButton);
+      } else {
+        submitButton.click();
+      }
+
+      return;
+    }
+
+    // Modified shortcuts other than Cmd/Ctrl+Enter remain under ChatGPT's control.
+    if (event.shiftKey || event.metaKey || event.ctrlKey) {
+      return;
+    }
+
     event.preventDefault();
     event.stopPropagation();
     event.stopImmediatePropagation();
 
+    // Reuse ChatGPT's existing Shift+Enter newline behaviour rather than editing
+    // ProseMirror state directly.
     editor.dispatchEvent(new KeyboardEvent('keydown', {
       key: 'Enter',
       code: 'Enter',
