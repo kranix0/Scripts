@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         1-Click Cancel Amazon S&S
 // @namespace    com.dhanapalan.userscripts
-// @version      0.4.2
+// @version      0.5
 // @description  Adds a one-click button to Amazon Subscribe & Save pages to cancel visible subscriptions.
 // @author       Sridhar Dhanapalan <sridhar@dhanapalan.com>
 // @license      MIT; see NOTICE.md for third-party attribution
@@ -18,6 +18,17 @@
 // @match        https://www.amazon.nl/auto-deliveries*
 // @match        https://www.amazon.co.jp/auto-deliveries*
 // @match        https://www.amazon.in/auto-deliveries*
+// @match        https://www.amazon.com/gp/subscribe-and-save/manager*
+// @match        https://www.amazon.com.au/gp/subscribe-and-save/manager*
+// @match        https://www.amazon.co.uk/gp/subscribe-and-save/manager*
+// @match        https://www.amazon.ca/gp/subscribe-and-save/manager*
+// @match        https://www.amazon.de/gp/subscribe-and-save/manager*
+// @match        https://www.amazon.fr/gp/subscribe-and-save/manager*
+// @match        https://www.amazon.it/gp/subscribe-and-save/manager*
+// @match        https://www.amazon.es/gp/subscribe-and-save/manager*
+// @match        https://www.amazon.nl/gp/subscribe-and-save/manager*
+// @match        https://www.amazon.co.jp/gp/subscribe-and-save/manager*
+// @match        https://www.amazon.in/gp/subscribe-and-save/manager*
 // @run-at       document-idle
 // @grant        none
 // ==/UserScript==
@@ -47,11 +58,34 @@
   }
 
   function getVisibleSubscriptionIds() {
-    return unique(
-      Array.from(document.querySelectorAll('[data-subscription-id]'))
-        .map((element) => element.getAttribute('data-subscription-id'))
-        .filter(Boolean)
+    const ids = [];
+
+    // Modern Amazon S&S (MYD Hub) tiles and links
+    const modernElements = document.querySelectorAll(
+      '[data-edit-url*="subscriptionId="], [data-url*="subscriptionId="], a[href*="subscriptionId="]'
     );
+    modernElements.forEach((element) => {
+      const rawUrl =
+        element.getAttribute('data-edit-url') ||
+        element.getAttribute('data-url') ||
+        element.getAttribute('href') ||
+        '';
+      const match = rawUrl.match(/[?&]subscriptionId=([A-Za-z0-9_-]+)/);
+      if (match && match[1]) {
+        ids.push(match[1]);
+      }
+    });
+
+    // Legacy Amazon S&S layout
+    const legacyElements = document.querySelectorAll('[data-subscription-id]');
+    legacyElements.forEach((element) => {
+      const id = element.getAttribute('data-subscription-id');
+      if (id) {
+        ids.push(id);
+      }
+    });
+
+    return unique(ids);
   }
 
   async function fetchWithTimeout(url, options, timeoutMs) {
@@ -269,6 +303,22 @@
     }
   }
 
+  function setupObserver(button) {
+    let debounceTimer = null;
+    const observer = new MutationObserver(() => {
+      if (button.dataset.mode === 'working') return;
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        updateButton(button);
+      }, 300);
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+  }
+
   function addButton() {
     const existingButton = document.getElementById(BUTTON_ID);
     if (existingButton) return existingButton;
@@ -292,6 +342,7 @@
     button.addEventListener('click', () => onClick(button));
     document.body.appendChild(button);
     updateButton(button);
+    setupObserver(button);
 
     return button;
   }
