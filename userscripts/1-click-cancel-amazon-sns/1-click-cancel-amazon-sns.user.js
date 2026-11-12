@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         1-Click Cancel Amazon S&S
 // @namespace    com.dhanapalan.userscripts
-// @version      0.4.2
+// @version      0.5.0
 // @description  Adds a one-click button to Amazon Subscribe & Save pages to cancel visible subscriptions.
 // @author       Sridhar Dhanapalan <sridhar@dhanapalan.com>
 // @license      MIT; see NOTICE.md for third-party attribution
@@ -47,11 +47,31 @@
   }
 
   function getVisibleSubscriptionIds() {
-    return unique(
-      Array.from(document.querySelectorAll('[data-subscription-id]'))
-        .map((element) => element.getAttribute('data-subscription-id'))
-        .filter(Boolean)
-    );
+    const legacyIds = Array.from(document.querySelectorAll('[data-subscription-id]'))
+      .map((element) => element.getAttribute('data-subscription-id'))
+      .filter(Boolean);
+
+    // Since 2026, Amazon also puts IDs in edit URLs. Only inspect page
+    // attributes: a broad HTML scan could include off-page subscriptions.
+    const editUrlIds = Array.from(document.querySelectorAll('[data-edit-url]'))
+      .map((element) => {
+        const editUrl = element.getAttribute('data-edit-url') || '';
+        const match = editUrl.match(/(?:[?&]|&amp;)subscriptionId=([\w-]+)/);
+        return match ? match[1] : null;
+      })
+      .filter(Boolean);
+
+    return unique([...legacyIds, ...editUrlIds]);
+  }
+
+  function panelHasCancelForm(html) {
+    const container = document.createElement('div');
+    container.innerHTML = html;
+    return Boolean(container.querySelector("form[name='cancelForm']"));
+  }
+
+  function pause(milliseconds) {
+    return new Promise((resolve) => setTimeout(resolve, milliseconds));
   }
 
   async function fetchWithTimeout(url, options, timeoutMs) {
@@ -72,8 +92,8 @@
     const failed = results.filter((result) => !result.ok);
     const summary = [
       'Mode: visible page only',
-      `Successful attempts: ${successful.length}`,
-      `Failed attempts: ${failed.length}`,
+      `Cancel form absent on recheck: ${successful.length}`,
+      `Not confirmed: ${failed.length}`,
     ];
 
     if (failed.length > 0) {
@@ -83,7 +103,11 @@
       });
     }
 
-    summary.push('', "Refresh the page and verify Amazon's state before trying again.");
+    summary.push(
+      '',
+      'Form absence is an indication, not proof, of cancellation.',
+      "Refresh Amazon's subscription list and check cancellation emails."
+    );
     return summary.join('\n');
   }
 
@@ -93,7 +117,7 @@
       button.disabled = false;
       button.textContent = '✓ 1-Click S&S active';
       button.title =
-        'The userscript is running. No visible Subscribe & Save subscriptions ' +
+        'The userscript is running. No supported subscription IDs ' +
         'were found on this page. Click for details.';
 
       Object.assign(button.style, {
@@ -190,6 +214,8 @@
       }
 
       const formData = new FormData(form);
+      // The September 2026 replacement sets this even if absent from the form.
+      formData.set('sns-cancellation-dropdown', 'SnS_MYD_SnsCancelReason_sns_cancel_reason_other');
       const body = new URLSearchParams();
       for (const [name, value] of formData.entries()) {
         body.append(name, String(value));
@@ -215,10 +241,29 @@
         };
       }
 
-      return {
-        ok: true,
-        subscriptionId,
-      };
+      // HTTP success alone does not establish cancellation. Recheck the panel.
+      const verificationResponse = await fetchWithTimeout(
+        panelUrl,
+        { cache: 'no-store' },
+        CANCEL_TIMEOUT_MS
+      );
+      if (!verificationResponse.ok || verificationResponse.redirected) {
+        return {
+          ok: false,
+          subscriptionId,
+          reason: `verification request failed or redirected: HTTP ${verificationResponse.status}`,
+        };
+      }
+
+      const verificationPanel = await verificationResponse.text();
+      if (!verificationPanel.trim()) {
+        return { ok: false, subscriptionId, reason: 'empty verification response' };
+      }
+      if (panelHasCancelForm(verificationPanel)) {
+        return { ok: false, subscriptionId, reason: 'cancel form still available after submission' };
+      }
+
+      return { ok: true, subscriptionId };
     } catch (error) {
       return {
         ok: false,
@@ -233,9 +278,18 @@
   }
 
   async function cancelVisibleSubscriptions(subscriptionIds) {
-    return Promise.all(
-      unique(subscriptionIds).map((subscriptionId) => cancelSubscription(subscriptionId))
-    );
+    const results = [];
+    const ids = unique(subscriptionIds);
+    const batchSize = 4;
+
+    for (let i = 0; i < ids.length; i += batchSize) {
+      const batch = ids.slice(i, i + batchSize);
+      results.push(...await Promise.all(batch.map(cancelSubscription)));
+      if (i + batchSize < ids.length) {
+        await pause(500);
+      }
+    }
+    return results;
   }
 
   async function onClick(button) {
@@ -246,8 +300,8 @@
       alert(
         `${SCRIPT_NAME}\n\n` +
         'The userscript is installed and running on this page.\n\n' +
-        'No visible Subscribe & Save subscriptions were found.\n\n' +
-        'When subscriptions are present, the button will show how many visible items it can cancel.'
+        'No supported subscription IDs were found on this page.\n\n' +
+        'Amazon may have changed its page structure. No cancellation requests were sent.'
       );
       return;
     }

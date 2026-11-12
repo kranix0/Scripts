@@ -2,6 +2,20 @@
 
 Notable changes to **1-Click Cancel Amazon S&S** are recorded here.
 
+## 0.5.0
+
+### Changed
+
+- Detects identifiers from Amazon's newer `data-edit-url` attributes while retaining legacy `data-subscription-id` support.
+- Processes cancellation requests in batches of up to four with a short pause.
+- Rechecks the cancellation panel after submission and treats unverified results as failures rather than assuming HTTP success.
+- Clarifies that an empty status could also indicate a changed Amazon page.
+
+### Verification
+
+- Informed by the September 2026 replacement code discussed under [L422Y's original gist](https://gist.github.com/L422Y/53b75be4bb8afd5cd6143e74150cc142).
+- Live cancellation against an active account remains untested; absence of the cancellation form is an indication, not proof of cancellation.
+
 ## 0.4.2
 
 ### Added
