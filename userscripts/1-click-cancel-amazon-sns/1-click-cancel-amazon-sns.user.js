@@ -214,9 +214,8 @@
       }
 
       const formData = new FormData(form);
-      if (formData.has('sns-cancellation-dropdown')) {
-        formData.set('sns-cancellation-dropdown', 'SnS_MYD_SnsCancelReason_sns_cancel_reason_other');
-      }
+      // The September 2026 replacement sets this even if absent from the form.
+      formData.set('sns-cancellation-dropdown', 'SnS_MYD_SnsCancelReason_sns_cancel_reason_other');
       const body = new URLSearchParams();
       for (const [name, value] of formData.entries()) {
         body.append(name, String(value));
