@@ -4,7 +4,7 @@ A one-click userscript for cancelling visible Amazon Subscribe & Save subscripti
 
 ## Status
 
-Current version: **0.4.2**
+Current version: **0.5.0**
 
 It operates on the current page only. Pagination and automatic multi-page cancellation are intentionally out of scope.
 
@@ -14,13 +14,16 @@ See [`CHANGELOG.md`](./CHANGELOG.md) for release history.
 
 - Adds a floating status and cancellation button to the bottom-right corner of supported Amazon Subscribe & Save pages.
 - Shows an understated status button when no visible subscriptions are found, confirming that the userscript is installed and running.
-- Shows the number of visible subscriptions detected on the current page.
+- Detects subscription identifiers from both legacy `data-subscription-id` and newer `data-edit-url` attributes.
+- Shows the number of subscriptions detected through supported attributes on the current page.
 - Cancels only the subscriptions represented by the number shown on the button.
 - Provides explanatory tooltips for inactive, cancellation-ready and working states.
 - Works from the current Amazon marketplace origin rather than relying on a hardcoded `amazon.com` address.
 - Works with the main S&S links in Amazon's UI.
 - Applies a timeout to each cancellation request.
-- Reports per-item successes and failures after the run.
+- Runs at most four cancellation requests concurrently, with a pause between batches.
+- Rechecks Amazon's cancellation form after each submission, reporting whether it remains available.
+- Reports per-item confirmation failures instead of assuming HTTP success means cancellation.
 
 ## Why a userscript?
 
@@ -48,7 +51,7 @@ attempts to cancel the three visible subscriptions detected on the current page.
 
 There is no additional confirmation dialog, and the operation cannot be undone by this script. Check the button count before clicking it.
 
-When no visible subscriptions are found, the button appears in an understated status mode. Clicking it only confirms that the userscript is installed and running. It does not make any cancellation requests.
+When no supported subscription identifiers are detected, the button appears in an understated status mode. This may mean that no subscriptions are present or that Amazon's markup has changed. Clicking it only confirms that the userscript is installed and running. It does not make any cancellation requests.
 
 ## Supported Amazon marketplaces
 
@@ -93,10 +96,11 @@ If Amazon displays subscriptions across multiple pages, repeat the process separ
 
 ## Limitations
 
-- Only subscriptions visible on the current page are processed.
+- Only subscription identifiers found in supported page attributes are processed; the script does not scan arbitrary page HTML for identifiers.
 - The script does not navigate through pagination.
 - It depends on Amazon's current page structure and cancellation workflow.
-- Successful cancellation of active subscriptions has been confirmed through user feedback.
+- Successful cancellation of active subscriptions has been confirmed for earlier versions through user feedback. The 0.5.0 compatibility changes have not been live-tested against active subscriptions.
+- The absence of a cancellation form after submission is only an indication of success. Verify Amazon's subscription list and cancellation email.
 - I no longer have active subscriptions myself – thanks to an earlier version of this script – so I cannot currently perform live cancellation testing.
 
 ## Licence and attribution
